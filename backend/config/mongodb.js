@@ -1,25 +1,26 @@
 import mongoose from "mongoose";
 
-let isConnected = false;
-
 const connectDB = async () => {
-  if (isConnected) return;
+  // Use Mongoose's internal state check
+  if (mongoose.connection.readyState >= 1) {
+    console.log("Using existing MongoDB connection");
+    return;
+  }
 
   try {
-    const db = await mongoose.connect(
-      `${process.env.MONGODB_URI}/trendify`,
-      {
-        bufferCommands: true,
-        serverSelectionTimeoutMS: 5000,
-        socketTimeoutMS: 45000,
-      }
-    );
+    // Disable buffering so it fails fast instead of hanging for 10s
+    mongoose.set('bufferCommands', false);
 
-    isConnected = db.connections[0].readyState === 1;
+    await mongoose.connect(process.env.MONGODB_URI, {
+      dbName: "trendify",
+      serverSelectionTimeoutMS: 5000, // Fail after 5s if DB is unreachable
+    });
 
-    console.log("MongoDB connected");
+    console.log("MongoDB connected successfully");
   } catch (error) {
-    console.error("MongoDB connection error:", error.message);
+    console.error("CRITICAL: MongoDB connection failed:", error.message);
+    // Throwing error ensures the API route returns a failure immediately
+    throw new Error("Database connection failed");
   }
 };
 
