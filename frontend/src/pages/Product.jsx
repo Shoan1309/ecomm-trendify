@@ -3,11 +3,12 @@ import { useParams } from 'react-router-dom'
 import { ShopContext } from '../context/ShopContext';
 import { assets } from '../assets/assets';
 import RelatedProducts from '../components/RelatedProducts';
+import ProductDetailSkeleton from '../components/ProductDetailSkeleton';
 
 const Product = () => {
 
   const {productId} = useParams();
-  const {products, currency, addToCart} = useContext(ShopContext);
+  const {products, currency, addToCart, loading} = useContext(ShopContext);
   const [productData, setProductData] = useState(false);
   const [image, setImage] = useState('');
   const [size, setSize] = useState('');
@@ -26,7 +27,9 @@ const Product = () => {
     fetchProductData();
   }, [productId, products]);
 
-  return productData ? (
+  return loading ? (
+    <ProductDetailSkeleton />
+  ) : productData ? (
     <div className='pt-10 transition-opacity duration-500 ease-in border-t-2 opacity-100'>
       {/* Product Data */}
       <div className='flex flex-col gap-12 sm:gap-12 sm:flex-row'>

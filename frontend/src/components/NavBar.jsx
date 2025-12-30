@@ -52,7 +52,8 @@ const NavBar = () => {
                         {user ? (
                           <>
                             <p className='cursor-pointer hover:text-black'>Profile</p>
-                            <p className='cursor-pointer hover:text-black'>Orders</p>
+                            <NavLink to='/orders' className='cursor-pointer hover:text-black'><p className='cursor-pointer hover:text-black'>Orders</p></NavLink>
+                            
                             <p onClick={logout} className='cursor-pointer hover:text-black'>Logout</p>
                           </>
                         ) : (

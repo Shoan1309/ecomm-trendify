@@ -4,16 +4,20 @@ import userModel from "../models/userModel.js";
 // INFO: Placing orders using COD Method
 const placeOrder = async (req, res) => {
   try {
-    const { userId, items, amount, address } = req.body;
+    const { userId, firstName, lastName, items, amount, address } = req.body;
 
+   
+    
     const orderData = {
       userId,
+      firstName,
+      lastName,
       items,
       address,
       amount,
       paymentMethod: "COD",
       payment: false,
-      date: Date.now(),
+      date: new Date().toISOString(),
     };
 
     const order = new orderModel(orderData);

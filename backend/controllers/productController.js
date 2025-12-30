@@ -14,14 +14,26 @@ const addProduct = async (req, res) => {
       bestSeller,
     } = req.body;
 
-    const image1 = req.files.image1 && req.files.image1[0];
-    const image2 = req.files.image2 && req.files.image2[0];
-    const image3 = req.files.image3 && req.files.image3[0];
-    const image4 = req.files.image4 && req.files.image4[0];
+    // Validate required fields
+    if (!name || !description || !price || !category || !subCategory) {
+      return res.status(400).json({ 
+        success: false, 
+        message: "Please provide all required fields: name, description, price, category, subCategory" 
+      });
+    }
+
+    const image1 = req.files?.image1 && req.files.image1[0];
+    const image2 = req.files?.image2 && req.files.image2[0];
+    const image3 = req.files?.image3 && req.files.image3[0];
+    const image4 = req.files?.image4 && req.files.image4[0];
 
     const productImages = [image1, image2, image3, image4].filter(
       (image) => image !== undefined
     );
+
+    if (productImages.length === 0) {
+      return res.status(400).json({ success: false, message: "Please upload at least one image" });
+    }
 
     let imageUrls = await Promise.all(
       productImages.map(async (image) => {
@@ -89,4 +101,62 @@ const getSingleProduct = async (req, res) => {
   }
 };
 
-export { addProduct, listProducts, removeProduct, getSingleProduct };
+// INFO: Route for updating a product
+const updateProduct = async (req, res) => {
+  try {
+    const { productId, name, description, price, category, subCategory, sizes, bestSeller } = req.body;
+
+    const image1 = req.files?.image1 && req.files.image1[0];
+    const image2 = req.files?.image2 && req.files.image2[0];
+    const image3 = req.files?.image3 && req.files.image3[0];
+    const image4 = req.files?.image4 && req.files.image4[0];
+
+    // Find existing product
+    const product = await productModel.findById(productId);
+    if (!product) {
+      return res.status(404).json({ success: false, message: "Product not found" });
+    }
+
+    // Prepare image updates
+    let imageUrls = [...product.image]; // Keep existing images by default
+    const newImages = [image1, image2, image3, image4].filter((image) => image !== undefined);
+
+    // Upload new images to Cloudinary
+    if (newImages.length > 0) {
+      const uploadedUrls = await Promise.all(
+        newImages.map(async (image) => {
+          let result = await cloudinary.uploader.upload(image.path, {
+            resource_type: "image",
+          });
+          return result.secure_url;
+        })
+      );
+      
+      // Replace images starting from index 0
+      imageUrls = uploadedUrls.concat(imageUrls.slice(uploadedUrls.length));
+      if (imageUrls.length > 4) {
+        imageUrls = imageUrls.slice(0, 4); // Keep only 4 images max
+      }
+    }
+
+    // Update product with new data
+    const updateData = {
+      name: name || product.name,
+      description: description || product.description,
+      price: price ? Number(price) : product.price,
+      category: category || product.category,
+      subCategory: subCategory || product.subCategory,
+      sizes: sizes ? JSON.parse(sizes) : product.sizes,
+      bestSeller: bestSeller !== undefined ? (bestSeller === "true" ? true : false) : product.bestSeller,
+      image: imageUrls,
+    };
+
+    await productModel.findByIdAndUpdate(productId, updateData, { new: true });
+    res.status(200).json({ success: true, message: "Product updated successfully" });
+  } catch (error) {
+    console.log("Error while updating product: ", error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+export { addProduct, listProducts, removeProduct, getSingleProduct, updateProduct };
