@@ -34,6 +34,7 @@ app.use(async (req, res, next) => {
     try {
       await connectDB();
       connectCloudinary();
+      console.log("Services connected");
       dbConnected = true;
     } catch (error) {
       console.error("Failed to connect services:", error);

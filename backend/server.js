@@ -10,6 +10,8 @@ import orderRouter from "./routes/orderRoute.js";
 // INFO: Create express app
 const app = express();
 const port = process.env.PORT || 4000;
+connectDB();
+connectCloudinary();
 
 // INFO: Middleware
 app.use(express.json());
@@ -25,19 +27,7 @@ app.get("/", (req, res) => {
   res.send("API is running...");
 });
 
-// INFO: Connect to database and start server
-const startServer = async () => {
-  try {
-    await connectDB();
-    connectCloudinary();
-    
-    app.listen(port, () =>
-      console.log(`Server is running on at http://localhost:${port}`)
-    );
-  } catch (error) {
-    console.error("Failed to start server:", error);
-    process.exit(1);
-  }
-};
-
-startServer();
+// INFO: Start server
+app.listen(port, () =>
+  console.log(`Server is running on at http://localhost:${port}`)
+);
