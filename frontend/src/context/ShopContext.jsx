@@ -133,13 +133,17 @@ const ShopContextProvider = (props) => {
   const placeOrder = async (orderData) => {
     try {
       const token = localStorage.getItem('token');
+      const orderWithDate = {
+        ...orderData,
+        date: Date.now(),
+      };
       const response = await fetch('http://localhost:4000/api/order/place', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
         },
-        body: JSON.stringify(orderData),
+        body: JSON.stringify(orderWithDate),
       });
       const data = await response.json();
       if (data.success) {
