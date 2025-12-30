@@ -12,6 +12,10 @@ const ShopContextProvider = (props) => {
   const [user, setUser] = useState(null);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalProducts, setTotalProducts] = useState(0);
+  const [pageSize] = useState(20);
   const navigate = useNavigate();
 
   const currency = "$";
@@ -19,12 +23,18 @@ const ShopContextProvider = (props) => {
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
   useEffect(() => {
-    // INFO: Fetch products from database
-    const fetchProducts = async () => {
+    // INFO: Fetch products from database with pagination
+    const fetchProducts = async (page = 1) => {
       try {
-        const response = await axios.get(backendUrl + "/api/product/list");
+        setLoading(true);
+        const response = await axios.get(
+          `${backendUrl}/api/product/list?page=${page}&limit=${pageSize}`
+        );
         if (response.data.success) {
           setProducts(response.data.products);
+          setCurrentPage(response.data.pagination.currentPage);
+          setTotalPages(response.data.pagination.totalPages);
+          setTotalProducts(response.data.pagination.totalProducts);
         }
       } catch (error) {
         console.error("Error fetching products:", error);
@@ -34,8 +44,8 @@ const ShopContextProvider = (props) => {
       }
     };
 
-    fetchProducts();
-  }, []);
+    fetchProducts(currentPage);
+  }, [currentPage]);
 
   useEffect(() => {
     // INFO: Load cart items from localStorage when the component mounts
@@ -204,6 +214,11 @@ const ShopContextProvider = (props) => {
     logout,
     navigate,
     loading,
+    currentPage,
+    setCurrentPage,
+    totalPages,
+    totalProducts,
+    pageSize,
   };
 
   return (

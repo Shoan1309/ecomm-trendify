@@ -6,7 +6,7 @@ import ProductItem from "../components/ProductItem";
 import CollectionSkeleton from "../components/CollectionSkeleton";
 
 const Collection = () => {
-  const { products, search, showSearch, loading } = useContext(ShopContext);
+  const { products, search, showSearch, loading, currentPage, setCurrentPage, totalPages } = useContext(ShopContext);
   const [showFilter, setShowFilter] = useState(false);
   const [filterProducts, setFilterProducts] = useState([]);
   const [category, setCategory] = useState([]);
@@ -205,17 +205,56 @@ const Collection = () => {
         {loading ? (
           <CollectionSkeleton count={12} />
         ) : (
-          <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4 gap-y-6">
-            {filterProducts.map((item, index) => (
-              <ProductItem
-                key={index}
-                id={item._id}
-                name={item.name}
-                image={item.image}
-                price={item.price}
-              />
-            ))}
-          </div>
+          <>
+            <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4 gap-y-6">
+              {filterProducts.map((item, index) => (
+                <ProductItem
+                  key={index}
+                  id={item._id}
+                  name={item.name}
+                  image={item.image}
+                  price={item.price}
+                />
+              ))}
+            </div>
+            
+            {/* Pagination Controls */}
+            {totalPages > 1 && (
+              <div className="flex justify-center items-center gap-4 mt-10">
+                <button
+                  onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                  disabled={currentPage === 1}
+                  className="px-4 py-2 border border-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100"
+                >
+                  Previous
+                </button>
+                
+                <div className="flex gap-2">
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                    <button
+                      key={page}
+                      onClick={() => setCurrentPage(page)}
+                      className={`px-3 py-2 rounded ${
+                        currentPage === page
+                          ? "bg-black text-white"
+                          : "border border-gray-300 hover:bg-gray-100"
+                      }`}
+                    >
+                      {page}
+                    </button>
+                  ))}
+                </div>
+                
+                <button
+                  onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                  disabled={currentPage === totalPages}
+                  className="px-4 py-2 border border-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100"
+                >
+                  Next
+                </button>
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>
