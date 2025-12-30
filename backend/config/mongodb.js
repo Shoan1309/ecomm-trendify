@@ -9,7 +9,9 @@ const connectDB = async () => {
     const db = await mongoose.connect(
       `${process.env.MONGODB_URI}/trendify`,
       {
-        bufferCommands: false
+        bufferCommands: true,
+        serverSelectionTimeoutMS: 5000,
+        socketTimeoutMS: 45000,
       }
     );
 
