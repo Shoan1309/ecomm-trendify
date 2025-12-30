@@ -82,6 +82,12 @@ const listProducts = async (req, res) => {
     const totalProducts = await productModel.countDocuments({});
     const totalPages = Math.ceil(totalProducts / limit);
 
+    console.log(`Fetching products - Page: ${page}, Limit: ${limit}, Total Products: ${totalProducts}, Products Found: ${products.length}`);
+
+    if (products.length === 0) {
+      console.warn("No products found in database");
+    }
+
     res.status(200).json({ 
       success: true, 
       products,
