@@ -17,6 +17,17 @@ connectCloudinary();
 app.use(express.json());
 app.use(cors());
 
+// INFO: Middleware to ensure DB connection before processing requests
+app.use(async (req, res, next) => {
+  try {
+    await connectDB();
+    next();
+  } catch (error) {
+    console.error("Database connection middleware error:", error);
+    res.status(503).json({ success: false, message: "Database connection failed" });
+  }
+});
+
 // INFO: API endpoints
 app.use("/api/user", userRouter);
 app.use("/api/product", productRouter);

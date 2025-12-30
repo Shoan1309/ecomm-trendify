@@ -1,26 +1,41 @@
 import mongoose from "mongoose";
 
+let isConnected = false;
+
 const connectDB = async () => {
-  // Use Mongoose's internal state check
-  if (mongoose.connection.readyState >= 1) {
+  // Check if already connected (important for serverless to reuse connections)
+  if (isConnected) {
+    console.log("Using existing MongoDB connection");
+    return;
+  }
+
+  // Check if connection is ready
+  if (mongoose.connection.readyState === 1) {
+    isConnected = true;
     console.log("Using existing MongoDB connection");
     return;
   }
 
   try {
-    // Disable buffering so it fails fast instead of hanging for 10s
-    mongoose.set('bufferCommands', false);
+    // For Vercel serverless: enable buffering and set appropriate timeouts
+    mongoose.set('bufferCommands', true);
 
     await mongoose.connect(process.env.MONGODB_URI, {
       dbName: "trendify",
-      serverSelectionTimeoutMS: 5000, // Fail after 5s if DB is unreachable
+      serverSelectionTimeoutMS: 15000,  // Increased for Vercel cold starts
+      socketTimeoutMS: 45000,
+      connectTimeoutMS: 15000,
+      maxPoolSize: 5,  // Lower for serverless
+      minPoolSize: 1,
+      family: 4,  // Use IPv4, important for Vercel
     });
 
-    console.log("MongoDB connected successfully");
+    isConnected = true;
+    console.log("MongoDB connected successfully on Vercel");
   } catch (error) {
     console.error("CRITICAL: MongoDB connection failed:", error.message);
-    // Throwing error ensures the API route returns a failure immediately
-    throw new Error("Database connection failed");
+    isConnected = false;
+    throw new Error(`Database connection failed: ${error.message}`);
   }
 };
 
