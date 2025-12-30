@@ -69,8 +69,29 @@ const addProduct = async (req, res) => {
 // INFO: Route for fetching all products
 const listProducts = async (req, res) => {
   try {
-    const products = await productModel.find({});
-    res.status(200).json({ success: true, products });
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    const products = await productModel
+      .find({})
+      .limit(limit)
+      .skip(skip)
+      .lean();
+
+    const totalProducts = await productModel.countDocuments({});
+    const totalPages = Math.ceil(totalProducts / limit);
+
+    res.status(200).json({ 
+      success: true, 
+      products,
+      pagination: {
+        currentPage: page,
+        totalPages,
+        totalProducts,
+        limit
+      }
+    });
   } catch (error) {
     console.log("Error while fetching all products: ", error);
     res.status(500).json({ success: false, message: error.message });
