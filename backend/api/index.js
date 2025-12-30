@@ -12,10 +12,6 @@ import orderRouter from "../routes/orderRoute.js";
 // INFO: Create express app
 const app = express();
 
-// INFO: Connect services (IMPORTANT: outside routes)
-connectDB();
-connectCloudinary();
-
 // INFO: Middleware
 app.use(express.json());
 app.use(cors());
@@ -28,6 +24,23 @@ app.use("/api/order", orderRouter);
 // INFO: Default route
 app.get("/", (req, res) => {
   res.send("API is running on Vercel 🚀");
+});
+
+// INFO: Initialize services with proper async handling
+let dbConnected = false;
+
+app.use(async (req, res, next) => {
+  if (!dbConnected) {
+    try {
+      await connectDB();
+      connectCloudinary();
+      dbConnected = true;
+    } catch (error) {
+      console.error("Failed to connect services:", error);
+      return res.status(500).json({ success: false, message: "Database connection failed" });
+    }
+  }
+  next();
 });
 
 // ❌ DO NOT USE app.listen()
