@@ -6,7 +6,7 @@ import ProductItem from "../components/ProductItem";
 import CollectionSkeleton from "../components/CollectionSkeleton";
 
 const Collection = () => {
-  const { products, search, showSearch, loading, currentPage, setCurrentPage, totalPages } = useContext(ShopContext);
+  const { products, search, showSearch, loading, collectionPage, setCollectionPage, collectionTotalPages } = useContext(ShopContext);
   const [showFilter, setShowFilter] = useState(false);
   const [filterProducts, setFilterProducts] = useState([]);
   const [category, setCategory] = useState([]);
@@ -219,23 +219,23 @@ const Collection = () => {
             </div>
             
             {/* Pagination Controls */}
-            {totalPages > 1 && (
+            {collectionTotalPages > 1 && (
               <div className="flex justify-center items-center gap-4 mt-10">
                 <button
-                  onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-                  disabled={currentPage === 1}
+                  onClick={() => setCollectionPage(Math.max(1, collectionPage - 1))}
+                  disabled={collectionPage === 1}
                   className="px-4 py-2 border border-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100"
                 >
                   Previous
                 </button>
                 
                 <div className="flex gap-2">
-                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                  {Array.from({ length: collectionTotalPages }, (_, i) => i + 1).map((page) => (
                     <button
                       key={page}
-                      onClick={() => setCurrentPage(page)}
+                      onClick={() => setCollectionPage(page)}
                       className={`px-3 py-2 rounded ${
-                        currentPage === page
+                        collectionPage === page
                           ? "bg-black text-white"
                           : "border border-gray-300 hover:bg-gray-100"
                       }`}
@@ -246,8 +246,8 @@ const Collection = () => {
                 </div>
                 
                 <button
-                  onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
-                  disabled={currentPage === totalPages}
+                  onClick={() => setCollectionPage(Math.min(collectionTotalPages, collectionPage + 1))}
+                  disabled={collectionPage === collectionTotalPages}
                   className="px-4 py-2 border border-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100"
                 >
                   Next

@@ -12,9 +12,8 @@ const ShopContextProvider = (props) => {
   const [user, setUser] = useState(null);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [totalProducts, setTotalProducts] = useState(0);
+  const [collectionPage, setCollectionPage] = useState(1);
+  const [collectionTotalPages, setCollectionTotalPages] = useState(1);
   const [pageSize] = useState(20);
   const navigate = useNavigate();
 
@@ -23,18 +22,16 @@ const ShopContextProvider = (props) => {
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
   useEffect(() => {
-    // INFO: Fetch products from database with pagination
-    const fetchProducts = async (page = 1) => {
+    // INFO: Fetch all products at once for home page display
+    const fetchAllProducts = async () => {
       try {
         setLoading(true);
         const response = await axios.get(
-          `${backendUrl}/api/product/list?page=${page}&limit=${pageSize}`
+          `${backendUrl}/api/product/list?page=1&limit=1000`
         );
         if (response.data.success) {
           setProducts(response.data.products);
-          setCurrentPage(response.data.pagination.currentPage);
-          setTotalPages(response.data.pagination.totalPages);
-          setTotalProducts(response.data.pagination.totalProducts);
+          setCollectionTotalPages(response.data.pagination.totalPages);
         }
       } catch (error) {
         console.error("Error fetching products:", error);
@@ -44,8 +41,8 @@ const ShopContextProvider = (props) => {
       }
     };
 
-    fetchProducts(currentPage);
-  }, [currentPage]);
+    fetchAllProducts();
+  }, []);
 
   useEffect(() => {
     // INFO: Load cart items from localStorage when the component mounts
@@ -214,10 +211,9 @@ const ShopContextProvider = (props) => {
     logout,
     navigate,
     loading,
-    currentPage,
-    setCurrentPage,
-    totalPages,
-    totalProducts,
+    collectionPage,
+    setCollectionPage,
+    collectionTotalPages,
     pageSize,
   };
 
