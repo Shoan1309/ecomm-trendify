@@ -26,12 +26,21 @@ const ShopContextProvider = (props) => {
     const fetchAllProducts = async () => {
       try {
         setLoading(true);
+        if (!backendUrl) {
+          console.error("Backend URL not configured");
+          toast.error("Backend URL not configured");
+          return;
+        }
         const response = await axios.get(
           `${backendUrl}/api/product/list?page=1&limit=1000`
         );
+        console.log("Products response:", response.data);
         if (response.data.success) {
           setProducts(response.data.products);
           setCollectionTotalPages(response.data.pagination.totalPages);
+        } else {
+          console.warn("API returned success: false");
+          toast.error("Failed to load products");
         }
       } catch (error) {
         console.error("Error fetching products:", error);
@@ -42,7 +51,7 @@ const ShopContextProvider = (props) => {
     };
 
     fetchAllProducts();
-  }, []);
+  }, [backendUrl]);
 
   useEffect(() => {
     // INFO: Load cart items from localStorage when the component mounts
