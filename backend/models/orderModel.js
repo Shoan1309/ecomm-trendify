@@ -11,13 +11,6 @@ const orderSchema = new mongoose.Schema({
   date: { type: Date, required: true, default: Date.now },
 });
 
-orderSchema.pre('save', function(next) {
-  if (this.date && typeof this.date === 'string') {
-    this.date = new Date(this.date);
-  }
-  next();
-});
-
 const orderModel = mongoose.models.order || mongoose.model("order", orderSchema);
 
 export default orderModel;
